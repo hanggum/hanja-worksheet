@@ -732,7 +732,7 @@ body {
 }
 
 .quiz-question.text-question {
-    font-size: 1rem;
+    font-size: 1.8rem;
     font-family: 'Noto Sans KR', sans-serif;
     width: auto;
     min-width: 60px;
