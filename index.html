@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한자 학습지 생성기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+</head>
+
+<body>
+    <div class="container" id="editorView">
+        <header class="app-header">
+            <h1>📝 한자 학습지 생성기</h1>
+            <p class="subtitle">한자능력검정시험 급수별 학습지를 만들어보세요</p>
+        </header>
+
+        <!-- 탭 메뉴 -->
+        <div class="tab-menu" style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center;">
+            <button class="tab-btn active" data-tab="practice">쓰기 연습</button>
+            <button class="tab-btn" data-tab="quiz">기출 문제</button>
+            <button class="tab-btn" data-tab="online">온라인 학습</button>
+            <button class="tab-btn" data-tab="directInput">직접 입력</button>
+        </div>
+
+        <main class="editor-main">
+            <div id="practiceTab" class="tab-content active">
+                <section class="selection-panel">
+                    <div class="form-group">
+                        <label for="levelSelect">
+                            <span class="label-icon">🎯</span>
+                            <span class="label-text">급수 선택</span>
+                        </label>
+                        <select id="levelSelect" class="level-select">
+                            <option value="">급수를 선택하세요</option>
+                            <option value="8급">8급 (50자)</option>
+                            <option value="7급">7급 (50자)</option>
+                            <option value="6급">6급 (75자)</option>
+                            <option value="5급">5급 (100자)</option>
+                            <option value="4급">4급 (150자)</option>
+                            <option value="3급">3급 (200자)</option>
+                            <option value="2급">2급 (300자)</option>
+                            <option value="1급">1급 (500자)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="layoutSelect">
+                            <span class="label-icon">📄</span>
+                            <span class="label-text">출력 양식</span>
+                        </label>
+                        <select id="layoutSelect" class="level-select">
+                            <option value="a5-1">A5 1자 선택</option>
+                            <option value="a4-2" selected>A4 1장 2자 선택 (기본)</option>
+                            <option value="a4-4">A4 2장 4자 선택</option>
+                            <option value="a4-6">A4 3장 6자 선택</option>
+                            <option value="a4-8">A4 4장 8자 선택</option>
+                            <option value="a4-10">A4 5장 10자 선택</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="characterSelectionGroup" style="display: none;">
+                        <label>
+                            <span class="label-icon">✏️</span>
+                            <span class="label-text">한자 선택</span>
+                            <span class="selected-count" id="selectedCount">0/2 선택됨</span>
+                        </label>
+                        <div class="character-grid" id="characterGrid">
+                            <!-- Characters will be populated here -->
+                        </div>
+                    </div>
+
+                    <button id="generateBtn" class="generate-btn" style="display: none;">
+                        <span class="btn-icon">📄</span>
+                        학습지 생성
+                    </button>
+                </section>
+            </div>
+
+            <div id="quizTab" class="tab-content" style="display: none;">
+                <section class="selection-panel">
+                    <div class="form-group">
+                        <label for="quizLevelSelect">
+                            <span class="label-icon">🎓</span>
+                            <span class="label-text">시험 급수 선택</span>
+                        </label>
+                        <select id="quizLevelSelect" class="level-select">
+                            <option value="">급수를 선택하세요</option>
+                            <option value="8급">8급</option>
+                            <option value="7급">7급</option>
+                            <option value="6급">6급</option>
+                            <option value="5급">5급</option>
+                            <option value="4급">4급</option>
+                            <option value="3급">3급</option>
+                            <option value="2급">2급</option>
+                            <option value="1급">1급</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="label-icon">📝</span>
+                            <span class="label-text">문제 유형 선택</span>
+                        </label>
+                        <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.5rem;">
+                            <label
+                                style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; cursor: pointer;">
+                                <input type="checkbox" name="quizType" value="reading" checked
+                                    style="width: 18px; height: 18px;">
+                                <span>독음 쓰기 (한자 → 음)</span>
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; cursor: pointer;">
+                                <input type="checkbox" name="quizType" value="meaning" checked
+                                    style="width: 18px; height: 18px;">
+                                <span>훈음 쓰기 (한자 → 뜻+음)</span>
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; cursor: pointer;">
+                                <input type="checkbox" name="quizType" value="writing"
+                                    style="width: 18px; height: 18px;">
+                                <span>한자 쓰기 (뜻+음 → 한자)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quizCount">
+                            <span class="label-icon">🔢</span>
+                            <span class="label-text">문항 수</span>
+                        </label>
+                        <select id="quizCount" class="level-select">
+                            <option value="20">20문제 (미니 테스트)</option>
+                            <option value="50" selected>50문제 (표준)</option>
+                            <option value="100">100문제 (실전 모의고사)</option>
+                        </select>
+                    </div>
+
+                    <button id="generateQuizBtn" class="generate-btn" style="margin-top: 2rem;">
+                        <span class="btn-icon">📝</span>
+                        <span>기출 문제 생성하기</span>
+                    </button>
+                </section>
+            </div>
+
+            <!-- 온라인 학습 탭 -->
+            <div id="onlineTab" class="tab-content" style="display: none;">
+                <section class="selection-panel">
+                    <div class="form-group">
+                        <label for="onlineLevelSelect">
+                            <span class="label-icon">💻</span>
+                            <span class="label-text">학습 급수 선택</span>
+                        </label>
+                        <select id="onlineLevelSelect" class="level-select">
+                            <option value="">급수를 선택하세요</option>
+                            <option value="8급">8급</option>
+                            <option value="7급">7급</option>
+                            <option value="6급">6급</option>
+                            <option value="5급">5급</option>
+                            <option value="4급">4급</option>
+                            <option value="3급">3급</option>
+                            <option value="2급">2급</option>
+                            <option value="1급">1급</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="label-icon">📝</span>
+                            <span class="label-text">문제 유형</span>
+                        </label>
+                        <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" name="onlineType" value="single_reading" checked
+                                    style="width: 16px; height: 16px;">
+                                <span>낱자 독음 맞추기 (天 → 천)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" name="onlineType" value="single_meaning" checked
+                                    style="width: 16px; height: 16px;">
+                                <span>낱자 훈음 맞추기 (天 → 하늘 천)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" name="onlineType" value="single_hanja" checked
+                                    style="width: 16px; height: 16px;">
+                                <span>낱자 한자 찾기 (하늘 천 → 天)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" name="onlineType" value="word_reading"
+                                    style="width: 16px; height: 16px;">
+                                <span>단어 읽기 (天地 → 천지)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="onlineCount">
+                            <span class="label-icon">🔢</span>
+                            <span class="label-text">학습 문항 수</span>
+                        </label>
+                        <select id="onlineCount" class="level-select">
+                            <option value="10">10문제 (가볍게)</option>
+                            <option value="20" selected>20문제 (표준)</option>
+                            <option value="50">50문제 (집중 학습)</option>
+                        </select>
+                    </div>
+
+                    <button id="startOnlineBtn" class="generate-btn"
+                        style="background-color: var(--secondary-color, #4a90e2);">
+                        <span class="btn-icon">▶️</span>
+                        <span>온라인 학습 시작하기</span>
+                    </button>
+                </section>
+            </div>
+
+            <!-- 직접 입력 탭 -->
+            <div id="directInputTab" class="tab-content" style="display: none;">
+                <section class="selection-panel">
+                    <div class="form-group">
+                        <label for="hanjaInput">
+                            <span class="label-icon">✍️</span>
+                            <span class="label-text">한자 입력</span>
+                        </label>
+                        <textarea id="hanjaInput" class="level-select" style="height: 150px; resize: vertical;"
+                            placeholder="학습할 한자를 입력하세요. (예: 天 地 玄 黃)&#13;&#10;여러 한자를 입력하면 자동으로 분리하여 학습지를 생성합니다."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="directLayoutSelect">
+                            <span class="label-icon">📄</span>
+                            <span class="label-text">출력 양식</span>
+                        </label>
+                        <select id="directLayoutSelect" class="level-select">
+                            <option value="a5-1">A5 1자 선택</option>
+                            <option value="a4-2" selected>A4 1장 2자 선택 (기본)</option>
+                            <option value="a4-4">A4 2장 4자 선택</option>
+                            <option value="a4-6">A4 3장 6자 선택</option>
+                            <option value="a4-8">A4 4장 8자 선택</option>
+                            <option value="a4-10">A4 5장 10자 선택</option>
+                        </select>
+                    </div>
+
+                    <button id="generateDirectBtn" class="generate-btn">
+                        <span class="btn-icon">📄</span>
+                        <span>입력한 한자로 학습지 생성</span>
+                    </button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="worksheet-container" id="worksheetView" style="display: none;">
+        <div class="print-controls no-print">
+            <div class="control-group">
+                <button id="backBtn" class="back-btn">← 돌아가기</button>
+                <button id="regenQuizBtn" class="secondary-btn" style="display: none;">🔄 새 문제 생성</button>
+            </div>
+            <div class="control-group">
+                <button id="printBtn" class="print-btn">🖨️ 인쇄하기</button>
+                <button id="showAnswerBtn" class="secondary-btn" style="display: none;">👁️ 정답 보기</button>
+            </div>
+        </div>
+        <div id="worksheetContent" class="worksheet-content">
+            <!-- Worksheet will be generated here -->
+        </div>
+    </div>
+
+    <!-- 온라인 학습 뷰 -->
+    <div class="online-container" id="onlineView" style="display: none;">
+        <div class="online-header">
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button id="exitOnlineBtn" class="back-btn" style="width: auto; padding: 0.5rem 1rem;">← 나가기</button>
+                <div class="online-title" id="onlineTitle">온라인 학습</div>
+            </div>
+            <div class="online-progress">
+                <span id="progressText">0/0</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+            <div class="online-score" id="scoreDisplay" style="display: none;">0점</div>
+        </div>
+
+        <div class="online-content" id="onlineContent">
+            <!-- Questions will be injected here -->
+        </div>
+
+        <div class="online-controls">
+            <button id="submitOnlineBtn" class="generate-btn">답안 제출 및 채점</button>
+            <button id="retryWrongBtn" class="generate-btn" style="display: none; background-color: #f59e0b;">틀린 문제 다시
+                풀기</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
